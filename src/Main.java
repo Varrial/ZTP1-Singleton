@@ -1,71 +1,98 @@
+import java.util.Arrays;
+
+
 interface IPolaczenie {
+    
     char get(int indeks);
-
+    
     void set(int indeks, char c);
-
+    
     int length();
+    
 }
 
-class Baza { // singleton
-    private StringBuilder tab = new StringBuilder();
-    private Baza() {
-    }
-
-    private static Baza instance = new Baza();
-
+class Baza {
+    
+    private char[] tab = new char[100]; /* Baza danych */
+    
+    private Baza() { } /* Pusty konstruktor */
+    private static Baza instance = null; /* Singleton */
     public static Baza getInstance() {
+        if (instance == null) {
+            instance = new Baza();
+        }
         return instance;
     }
-
+    
     public static IPolaczenie getPolaczenie() {
         return Polaczenie.getInstance();
     }
-
-    private static class Polaczenie implements IPolaczenie {
-        private Baza baza;
-        private static Polaczenie[] polaczenia = { new Polaczenie(), new Polaczenie(), new Polaczenie() };
-        private static int kolejnosc = 0;
-
-        private Polaczenie() {
-            this.baza = Baza.getInstance();
-        }
-
+    
+    
+    private static class Polaczenie implements IPolaczenie { /* Multiton */
+        
+        private static final Baza baza = new Baza();
+        private static Polaczenie[] instances = null;
+        private static int obecny = 0;
+        
         public static IPolaczenie getInstance() {
-            kolejnosc = (kolejnosc + 1) % polaczenia.length;
-            return polaczenia[kolejnosc];
+            if (instances == null) {
+                instances = new Polaczenie[] {new Polaczenie()};
+            } else if (instances.length < 3) {
+                instances = Arrays.copyOf(instances, instances.length+1);
+                instances[instances.length-1] = new Polaczenie();
+                obecny++;
+            } else {
+                obecny++;
+                obecny %= instances.length;
+            }
+            return instances[obecny];
         }
-
+        
         public char get(int indeks) {
-            return baza.tab.charAt(indeks);
+            
+            return baza.tab[indeks];
+            
         }
-
+        
         public void set(int indeks, char c) {
-            baza.tab.setCharAt(indeks, c);
+            
+            baza.tab[indeks] = c;
+            
         }
-
+        
         public int length() {
-            return baza.tab.length();
+            
+            return baza.tab.length;
+            
         }
-
+        
     }
+    
+}
 
+public class Main {
     public static void main(String[] args) {
-        Baza baza_1 = Baza.getInstance();
-        Baza baza_2 = Baza.getInstance();
+        Baza baza;
+        baza = Baza.getInstance();
+        System.out.println(baza);
+        IPolaczenie pol1, pol2, pol3, pol4, pol5;
+        pol1 = Baza.getPolaczenie();
+        pol2 = Baza.getPolaczenie();
+        pol3 = Baza.getPolaczenie();
+        pol4 = Baza.getPolaczenie();
+        pol5 = Baza.getPolaczenie();
+        System.out.println(pol1);
+        System.out.println(pol2);
+        System.out.println(pol3);
+        System.out.println(pol4);
+        System.out.println(pol5);
         
-        System.out.println("baza_1 = " + baza_1);
-        System.out.println("baza_2 = " + baza_2);
+        pol1.set(0, '1');
+        System.out.println(pol1.get(0));
         
-        IPolaczenie polaczenie_1, polaczenie_2, polaczenie_3, polaczenie_4;
-        
-        polaczenie_1 = Polaczenie.getInstance();
-        polaczenie_2 = Polaczenie.getInstance();
-        polaczenie_3 = Polaczenie.getInstance();
-        polaczenie_4 = Polaczenie.getInstance();
-        
-        System.out.println(polaczenie_1);
-        System.out.println(polaczenie_2);
-        System.out.println(polaczenie_3);
-        System.out.println(polaczenie_4);
+        pol2.set(0, '2');
+        System.out.println(pol1.get(0));
     }
+
 }
